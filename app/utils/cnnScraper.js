@@ -8,7 +8,13 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function scrapeCNNCoupons(urls) {
     const browser = await chromium.launch({ 
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
+        args: [
+            '--disable-dev-shm-usage',
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-gpu'
+        ]
     });
     let coupons = [];
 
