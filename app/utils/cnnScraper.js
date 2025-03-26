@@ -9,7 +9,7 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
 
 
-async function scrapeCNNCoupons(urls) {
+async function scrapeCNNCoupons(urls) { 
     const browser = await puppeteer.launch({
         args: isLocal ? puppeteer.defaultArgs() : chromium.args,
         defaultViewport: chromium.defaultViewport,
