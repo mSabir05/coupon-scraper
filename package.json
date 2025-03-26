@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "postinstall": "npx playwright install chromium",
+
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@sparticuz/chromium-min": "^126.0.0",
     "next": "15.2.4",
     "playwright": "^1.51.1",
+    "puppeteer-core": "^22.13.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "xlsx": "^0.18.5"

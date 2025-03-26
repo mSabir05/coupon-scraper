@@ -1,34 +1,32 @@
-import { chromium } from 'playwright';
+// import { chromium } from 'playwright';
+import chromium from '@sparticuz/chromium-min';
+import puppeteer from 'puppeteer-core';
 import * as XLSX from 'xlsx';
 import fs from 'fs';
 import path from 'path';
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
+
 
 async function scrapeCNNCoupons(urls) {
-    const browser = await chromium.launch({ 
-        headless: true,
-        executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
-        args: [
-            '--disable-dev-shm-usage',
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-gpu'
-        ]
+    const browser = await puppeteer.launch({
+        args: isLocal ? puppeteer.defaultArgs() : chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath(),
+        headless: chromium.headless,
     });
     let coupons = [];
 
     for (const url of urls) {
-        const context = await browser.newContext({
-            userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
-            viewport: { width: 1480, height: 900 }
-        });
-        const page = await context.newPage();
+        const page = await browser.newPage();
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3');
+        await page.setViewport({ width: 1480, height: 900 });
         let codesFetched = 0;
 
         while (codesFetched < 10) {
             try {
-                await page.goto(url, { waitUntil: 'networkidle' });
+                await page.goto(url, { waitUntil: 'networkidle0' });
                 await page.waitForSelector('div._1ip0fbda._1ip0fbdb._1ip0fbdc');
 
                 // Remove "SEE DEAL" buttons
@@ -70,9 +68,9 @@ async function scrapeCNNCoupons(urls) {
                     console.log(`Processing coupon ${codesFetched + 1}: ${coupon.title}`);
 
                     const [newPage] = await Promise.all([
-                        context.waitForEvent('page'),
+                        browser.waitForTarget(target => target.opener() === page.target()),
                         page.click(`div._1ip0fbda._1ip0fbdb._1ip0fbdc div[role="button"][title="See code"]`)
-                    ]);
+                    ]).then(async ([target]) => [await target.page()]);
 
                     await newPage.waitForSelector('h4.az57m40.az57m46._1s9cypgb', { timeout: 5000 })
                         .catch(() => null);
@@ -119,7 +117,7 @@ async function scrapeCNNCoupons(urls) {
                 break;
             }
         }
-        await context.close();
+        await page.close(); // Changed from context.close()
     }
     await browser.close();
     await saveCouponsToExcel(coupons);
