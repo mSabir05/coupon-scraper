@@ -12,13 +12,21 @@ const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
 
 async function scrapeCNNCoupons(urls) { 
     const browser = await puppeteer.launch({
-        args: isLocal ? puppeteer.defaultArgs() : chromium.args,
+        args: isLocal ? puppeteer.defaultArgs() : [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu'
+        ],
         defaultViewport: {
             width: 1480,
             height: 900
         },
         executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath(),
-        headless: isLocal ? true : chromium.headless,
+        headless: true
     });
     let coupons = [];
 
