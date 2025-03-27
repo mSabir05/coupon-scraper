@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@sparticuz/chromium": "^133.0.0",
     "@sparticuz/chromium-min": "^126.0.0",
     "next": "15.2.4",
     "playwright": "^1.51.1",

@@ -1,5 +1,5 @@
 // import { chromium } from 'playwright';
-import chromium from '@sparticuz/chromium-min';
+import { chromium } from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
 import * as XLSX from 'xlsx';
 import fs from 'fs';
@@ -9,12 +9,16 @@ const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 const isLocal = !!process.env.CHROME_EXECUTABLE_PATH;
 
 
+
 async function scrapeCNNCoupons(urls) { 
     const browser = await puppeteer.launch({
         args: isLocal ? puppeteer.defaultArgs() : chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath('https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar'),
-        headless: chromium.headless,
+        defaultViewport: {
+            width: 1480,
+            height: 900
+        },
+        executablePath: process.env.CHROME_EXECUTABLE_PATH || await chromium.executablePath(),
+        headless: isLocal ? true : chromium.headless,
     });
     let coupons = [];
 
